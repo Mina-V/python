@@ -1,0 +1,103 @@
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+def data_cleaning_example():
+    # 1. 加载数据
+    try:
+        # 假设我们从CSV文件加载数据
+        df = pd.read_csv('raw_data.csv', encoding='utf-8')
+        print("原始数据示例:")
+        print(df.head())
+    except FileNotFoundError:
+        print("文件未找到，创建示例数据...")
+        # 创建示例数据
+        data = {
+            'ID': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            'Name': ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', None, 'Grace', 'Henry', 'Ivy'],
+            'Age': [25, 30, None, 35, 40, 45, 50, 55, 'unknown', 60],
+            'Salary': [50000, 60000, 70000, None, 90000, 100000, 110000, 120000, 130000, 140000],
+            'Join_Date': ['2020-01-15', '2019-05-20', '2021-11-03', '2018-07-10', None, 
+                         '2022-02-28', '2017-09-15', '2023-01-01', '2016-12-25', '2020-06-18'],
+            'Department': ['HR', 'IT', 'IT', 'Finance', 'Marketing', 'IT', None, 'HR', 'Finance', 'Marketing'],
+            'Performance': ['A', 'B', 'A', 'C', 'B', 'A', 'D', 'A', 'B', 'A']
+        }
+        df = pd.DataFrame(data)
+        print("生成的示例数据:")
+        print(df)
+    
+    print("\n数据基本信息:")
+    print(df.info())
+    
+    # 2. 处理缺失值
+    print("\n缺失值统计:")
+    print(df.isnull().sum())
+    
+    # 根据列的不同特性处理缺失值
+    # 对于数值列，用中位数填充
+    if 'Salary' in df.columns:
+        df['Salary'] = df['Salary'].fillna(df['Salary'].median())
+    
+    # 对于分类列，用众数填充
+    if 'Department' in df.columns:
+        mode_dept = df['Department'].mode()[0]
+        df['Department'] = df['Department'].fillna(mode_dept)
+    
+    # 对于姓名这样的列，可以标记为"Unknown"或删除
+    if 'Name' in df.columns:
+        df = df[df['Name'].notna()]  # 删除姓名为空的记录
+    
+    # 3. 处理异常值和错误数据
+    if 'Age' in df.columns:
+        # 将非数值年龄转换为NaN
+        df['Age'] = pd.to_numeric(df['Age'], errors='coerce')
+        # 过滤掉不合理年龄(假设合理范围是18-70)
+        df = df[(df['Age'] >= 18) & (df['Age'] <= 70) | (df['Age'].isna())]
+        # 用平均年龄填充缺失值
+        df['Age'] = df['Age'].fillna(int(df['Age'].mean()))
+    
+    # 4. 数据类型转换
+    if 'Join_Date' in df.columns:
+        df['Join_Date'] = pd.to_datetime(df['Join_Date'], errors='coerce')
+        # 填充缺失的日期(可以用最早日期或其他逻辑)
+        df['Join_Date'] = df['Join_Date'].fillna(df['Join_Date'].min())
+    
+    # 5. 数据标准化
+    if 'Department' in df.columns:
+        df['Department'] = df['Department'].str.upper()
+    
+    if 'Name' in df.columns:
+        df['Name'] = df['Name'].str.title()
+    
+    # 6. 处理重复数据
+    print("\n重复值数量:", df.duplicated().sum())
+    df = df.drop_duplicates()
+    
+    # 7. 特征工程(可选)
+    if 'Join_Date' in df.columns:
+        df['Years_of_Service'] = (datetime.now() - df['Join_Date']).dt.days / 365
+        df['Years_of_Service'] = df['Years_of_Service'].round(1)
+    
+    # 8. 分类数据编码(可选)
+    if 'Performance' in df.columns:
+        performance_map = {'A': 4, 'B': 3, 'C': 2, 'D': 1}
+        df['Performance_Score'] = df['Performance'].map(performance_map)
+    
+    # 9. 数据分箱(可选)
+    if 'Salary' in df.columns:
+        bins = [0, 60000, 90000, 120000, float('inf')]
+        labels = ['Low', 'Medium', 'High', 'Very High']
+        df['Salary_Level'] = pd.cut(df['Salary'], bins=bins, labels=labels)
+    
+    # 10. 保存清洗后的数据
+    df.to_csv('cleaned_data.csv', index=False, encoding='utf-8')
+    
+    print("\n清洗后的数据示例:")
+    print(df.head())
+    print("\n清洗后的数据基本信息:")
+    print(df.info())
+    
+    return df
+
+# 执行数据清洗
+cleaned_data = data_cleaning_example()
