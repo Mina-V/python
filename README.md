@@ -27,14 +27,42 @@ Although I leveraged GPT and coding copilots for support, I wrote, ran, and veri
 1. Clone this repo:
 ```bash
 git clone https://github.com/Mina-V/python.git
-
+```
 
 2. Open the notebook:
+```bash
 cd python
 jupyter notebook
+```
 
+3. Run `Text Preprocessing on Social Media Data (Tweets).ipynb`
 
+Note: You may need to install NLTK and download necessary packages (`punkt`, `wordnet`, `stopwords`) before running.
 
-3. Run Text Preprocessing on Social Media Data (Tweets).ipynb
+## 🔍 Example
 
-Note: You may need to install NLTK and download necessary packages (punkt, wordnet, stopwords) before running.
+**Before Cleaning**:
+```
+"I can't believe this is happening 😭 #shocked @someone http://t.co"
+```
+
+**After Cleaning**:
+```
+"believe happening shocked"
+```
+
+## 📈 Future Work
+- Add visualizations (word clouds, frequency plots)
+- Connect to sentiment classifiers
+- Package into a small Flask web app
+
+## 👩🏻‍💻 About Me
+
+This project is part of my ongoing transition into the AI and tech world.  
+I’m currently exploring data science, NLP, and cross-border entrepreneurship, and I believe that coding + insight = creative power.
+
+More projects to come.  
+Follow the journey 🌱✨
+
+## 📄 License
+MIT License — free to use, modify, and share with credit.
