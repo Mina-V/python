@@ -1,0 +1,114 @@
+## 1. Import libraries
+import pandas as pd
+import re
+import nltk
+from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from collections import Counter
+import matplotlib.pyplot as plt
+
+#  Download NLTK data (run once)
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+
+from google.colab import files
+uploaded = files.upload()
+
+
+import pandas as pd
+df = pd.read_csv('training.1600000.processed.noemoticon.csv', encoding='latin-1', header=None)
+
+# Load CSV (already uploaded to Colab)
+df = pd.read_csv("training.1600000.processed.noemoticon.csv", encoding="latin-1", header=None)
+df = df[[5]].rename(columns={5: 'Tweet'}).head(100)
+df.head()
+
+
+
+## 2. Tokenization
+# Using NLTK's sentence and word tokenizers.
+import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize # Import sent_tokenize and word_tokenize
+
+# Download the necessary NLTK data
+nltk.download('punkt_tab')
+
+# Now you can proceed with your tokenization
+df['Sent_Tokens'] = df['Tweet'].apply(sent_tokenize)
+df['Word_Tokens'] = df['Tweet'].apply(word_tokenize)
+df[['Tweet', 'Word_Tokens']].head()
+
+
+
+## 3. Normalization
+# Steps:
+# - Lowercase conversion
+# - Remove mentions, hashtags, URLs, punctuation
+
+import re
+from nltk.tokenize import word_tokenize
+
+def clean_tweet(tweet):
+    tweet = tweet.lower()
+    tweet = re.sub(r'@\w+', '', tweet)
+    tweet = re.sub(r'#\w+', '', tweet)
+    tweet = re.sub(r'http\S+|www\S+', '', tweet)
+    tweet = re.sub(r'[^\w\s]', '', tweet)
+    return tweet.strip()
+
+df['Clean_Tweet'] = df['Tweet'].apply(clean_tweet)
+df['Clean_Tokens'] = df['Clean_Tweet'].apply(word_tokenize)
+df[['Tweet', 'Clean_Tweet', 'Clean_Tokens']].head()
+
+
+
+## 4. Stemming and Lemmatization
+
+# Import necessary classes
+from nltk.stem import PorterStemmer, WordNetLemmatizer # Import PorterStemmer and WordNetLemmatizer
+
+# Download the 'wordnet' resource before initializing the WordNetLemmatizer
+import nltk
+nltk.download('wordnet')
+
+stemmer = PorterStemmer()
+lemmatizer = WordNetLemmatizer()
+
+df['Stemmed'] = df['Clean_Tokens'].apply(lambda tokens: [stemmer.stem(w) for w in tokens])
+df['Lemmatized'] = df['Clean_Tokens'].apply(lambda tokens: [lemmatizer.lemmatize(w) for w in tokens])
+
+df[['Clean_Tokens', 'Stemmed', 'Lemmatized']].head()
+
+
+
+## 5. Word Frequency (Excluding Stopwords)
+from nltk.corpus import stopwords
+
+stop_words = set(stopwords.words('english'))
+
+all_words = [word for tokens in df['Clean_Tokens'] for word in tokens if word not in stop_words]
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from collections import Counter
+
+word_freq = Counter(all_words)
+
+most_common_words = word_freq.most_common(10)
+words, counts = zip(*most_common_words)
+
+plt.figure(figsize=(6, 5))
+plt.plot(words, counts, marker='o', linestyle='-')
+plt.xlabel('Samples')
+plt.ylabel('Counts')
+plt.title('Top 10 Most Frequent Words')
+plt.grid(True)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+
